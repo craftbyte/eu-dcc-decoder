@@ -1,0 +1,25 @@
+{
+  "name": "eu-dcc-decoder",
+  "version": "0.0.1",
+  "description": "Decoder for the EU Digital Covid Certificate",
+  "main": "index.js",
+  "dependencies": {
+    "base45-js": "^1.0.2",
+    "cbor": "^7.0.6",
+    "dateformat": "^4.5.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/craftbyte/eu-dcc-decoder.git"
+  },
+  "author": "Anze Jensterle",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/craftbyte/eu-dcc-decoder/issues"
+  },
+  "homepage": "https://github.com/craftbyte/eu-dcc-decoder#readme"
+}
