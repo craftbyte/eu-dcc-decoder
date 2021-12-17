@@ -1,19 +1,18 @@
 const b45 = require('base45-js');
-const dateformat = require('dateformat');
 const cbor = require('cbor');
 const zlib = require('zlib');
 const util = require('util');
 const inflate = util.promisify(zlib.inflate);
 
 // valuesets
-const countries = require('./country-codes.json')['valueSetValues']
-const vaxDiseases = require('./vax-diseases.json')['valueSetValues']
-const vaxManufacturers = require('./vax-manf.json')['valueSetValues']
-const vaxNames = require('./vax-names.json')['valueSetValues']
-const vaxTypes = require('./vax-snomedtypes.json')['valueSetValues']
-const testManufacturers = require('./test-manf.json')['valueSetValues']
-const testTypes = require('./test-types.json')['valueSetValues']
-const testResults = require('./test-result.json')['valueSetValues']
+const countries = require('./valuesets/country-codes.json')['valueSetValues']
+const vaxDiseases = require('./valuesets/vax-diseases.json')['valueSetValues']
+const vaxManufacturers = require('./valuesets/vax-manf.json')['valueSetValues']
+const vaxNames = require('./valuesets/vax-names.json')['valueSetValues']
+const vaxTypes = require('./valuesets/vax-snomedtypes.json')['valueSetValues']
+const testManufacturers = require('./valuesets/test-manf.json')['valueSetValues']
+const testTypes = require('./valuesets/test-types.json')['valueSetValues']
+const testResults = require('./valuesets/test-result.json')['valueSetValues']
 
 async function decode(qr) {
     if (qr.indexOf("HC1:") != 0)
@@ -31,33 +30,56 @@ async function decode(qr) {
     if (d.hasOwnProperty("v")) type = "v"; // vaccinated
     else if (d.hasOwnProperty("t")) type = "t"; // tested
     else if (d.hasOwnProperty("r")) type = "r"; // recovered
-    console.log(`EU Digital COVID Certificate v${d.ver}`);
-    console.log(`Issued by ${countries[issuer].display} at ${dateformat(iat, "yyyy-mm-dd HH:MM:ss")}, expires ${dateformat(exp, "yyyy-mm-dd HH:MM:ss")}`);
-    console.log(`Issued to ${d.nam.gn} ${d.nam.fn} (${d.nam.fnt}<<${d.nam.gnt}), born ${d.dob}`);
+    let decoded = {
+        v: d.ver,
+        iss: countries.hasOwnProperty(issuer) ? countries[issuer].display : issuer,
+        iat,
+        exp,
+        sub: {...d.nam, dob: d.dob }
+    };
     switch (type) {
         case 'v':
             let v = d.v[0];
-            console.log("VACCINATED");
-            console.log(`Vaccinated on ${v.dt} by ${countries[v.co].display} with dose ${v.dn}/${v.sd} of ${vaxManufacturers[v.ma].display} ${vaxNames[v.mp].display} (${vaxTypes[v.vp].display}) targeting ${vaxDiseases[v.tg].display}`);
-            console.log(`Certificate issued by ${v.is} with ID ${v.ci}`);
+            decoded.v = {
+                ...v,
+                decoded: {
+                    ...v,
+                    co: countries[v.co].display,
+                    tg: vaxDiseases[v.tg].display,
+                    ma: vaxManufacturers[v.ma].display,
+                    mp: vaxNames[v.mp].display,
+                    vp: vaxTypes[v.vp].display,
+                }
+            }
             break;
         case 't':
             let t = d.t[0];
-            console.log("TESTED");
-            console.log(`Sample collected at ${dateformat(new Date(t.sc), "yyyy-mm-dd HH:MM:ss")} by ${t.tc} in ${countries[t.co].display} with test ${t.hasOwnProperty("ma") ? testManufacturers[t.ma].display + "(" + testTypes[t.tt].display + ")" : testTypes[t.tt].display} targeting ${vaxDiseases[t.tg].display}`);
-            console.log(t.hasOwnProperty("dr") ? `Result: ${testResults[t.tr].display} at ${dateformat(new Date(t.dr), "yyyy-mm-dd HH:MM:ss")}` : `Result: ${testResults[t.tr].display}`);
-            console.log(`Certificate issued by ${t.is} with ID ${t.ci}`);
+            decoded.t = {
+                ...t,
+                decoded: {
+                    ...t,
+                    co: countries[t.co].display,
+                    tg: vaxDiseases[t.tg].display,
+                    ma: t.hasOwnProperty("ma") ? testManufacturers.hasOwnProperty(t.ma) ? testManufacturers[t.ma].display : t.ma : undefined,
+                    tt: testTypes[t.tt].display,
+                    tr: testResults[t.tr].display,
+                }
+            }
             break;
         case 'r':
             let r = d.r[0];
-            console.log("RECOVERED");
-            console.log(`Recovered from ${vaxDiseases[r.tg].display}, date of first positive test ${dateformat(new Date(r.fr), "yyyy-mm-dd HH:MM:ss")} in ${countries[r.co].display}`)
-            console.log(`Certificate valid from ${r.df} until ${r.du}`)
-            console.log(`Certificate issued by ${r.is} with ID ${r.ci}`);
+            decoded.r = {
+                ...r,
+                decoded: {
+                    ...r,
+                    co: countries[r.co].display,
+                    tg: vaxDiseases[r.tg].display,
+                }
+            }
             break;
         default:
-            console.log("No valid certificate types found!");
             break;
     }
+    return decoded;
 }
 module.exports = { decode };
