@@ -5,7 +5,7 @@ let decodeStdIn = async() => {
     console.log(d);
     console.log(`EU Digital COVID Certificate v${d.ver}`);
     console.log(`Issued by ${d.iss} at ${dateformat(d.iat, "yyyy-mm-dd HH:MM:ss")}, expires ${dateformat(d.exp, "yyyy-mm-dd HH:MM:ss")}`);
-    console.log(`Issued to ${d.sub.gn} ${d.sub.fn} (${d.sub.fnt}<<${d.sub.gnt}), born ${d.sub.dob}`);
+    console.log(`Issued to ${d.sub.gn} ${d.sub.fn} (${d.sub.fnt}<<${d.sub.gnt}), born ${d.sub.dob} with id ${d.id}`);
     let type = null;
     if (d.hasOwnProperty("v")) type = "v"; // vaccinated
     else if (d.hasOwnProperty("t")) type = "t"; // tested
