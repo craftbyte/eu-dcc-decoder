@@ -40,6 +40,7 @@ async function decode(qr) {
     switch (type) {
         case 'v':
             let v = d.v[0];
+            decoded.id = v.ci;
             decoded.v = {
                 ...v,
                 decoded: {
@@ -54,6 +55,7 @@ async function decode(qr) {
             break;
         case 't':
             let t = d.t[0];
+            decoded.id = t.ci;
             decoded.t = {
                 ...t,
                 decoded: {
@@ -68,6 +70,7 @@ async function decode(qr) {
             break;
         case 'r':
             let r = d.r[0];
+            decoded.id = r.ci;
             decoded.r = {
                 ...r,
                 decoded: {
