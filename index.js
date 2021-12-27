@@ -31,7 +31,7 @@ async function decode(qr) {
     else if (d.hasOwnProperty("t")) type = "t"; // tested
     else if (d.hasOwnProperty("r")) type = "r"; // recovered
     let decoded = {
-        v: d.ver,
+        ver: d.ver,
         iss: countries.hasOwnProperty(issuer) ? countries[issuer].display : issuer,
         iat,
         exp,
