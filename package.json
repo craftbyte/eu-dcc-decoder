@@ -1,6 +1,6 @@
 {
     "name": "@craftbyte/eu-dcc-decoder",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Decoder for the EU Digital Covid Certificate",
     "main": "index.js",
     "dependencies": {
